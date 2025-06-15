@@ -23,6 +23,11 @@ export async function setupVite(app, server) {
   app.use(vite.ssrFixStacktrace);
   app.use(vite.middlewares);
 
+  // Add a simple health check route
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
@@ -42,10 +47,11 @@ export async function setupVite(app, server) {
 </html>
       `);
 
-      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      res.status(200).set({ "Content-Type": "text/html" }).send(template);
     } catch (e) {
+      console.error('Vite middleware error:', e);
       vite.ssrFixStacktrace(e);
-      next(e);
+      res.status(500).send('Internal Server Error');
     }
   });
 
