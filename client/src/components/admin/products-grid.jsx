@@ -13,7 +13,7 @@ import { Product } from "@/types";
 
 export default function ProductsGrid({ products = [] }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [formData, setFormData] = useState<ProductFormData>({
+  const [formData, setFormData] = useState({
     name: "",
     description: "",
     imageUrl: "",
@@ -26,7 +26,7 @@ export default function ProductsGrid({ products = [] }) {
   const queryClient = useQueryClient();
 
   const createProductMutation = useMutation({
-    mutationFnsync (productDataroductFormData) => {
+    mutationFn: async (productData) => {
       const response = await apiRequest('POST', '/api/products', productData);
       return response.json();
     },
@@ -37,7 +37,7 @@ export default function ProductsGrid({ products = [] }) {
       });
       setIsAddDialogOpen(false);
       resetForm();
-      queryClient.invalidateQueries({ queryKey'/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
     },
     onError: () => {
       toast({
@@ -49,7 +49,7 @@ export default function ProductsGrid({ products = [] }) {
   });
 
   const updateProductMutation = useMutation({
-    mutationFnsync ({ id, updates }: { idumber; updatesartial<Product> }) => {
+    mutationFn: async ({ id, updates }) => {
       const response = await apiRequest('PUT', `/api/products/${id}`, updates);
       return response.json();
     },
@@ -58,7 +58,7 @@ export default function ProductsGrid({ products = [] }) {
         title: "Product updated",
         description: "Product has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey'/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
     },
     onError: () => {
       toast({
@@ -81,7 +81,7 @@ export default function ProductsGrid({ products = [] }) {
     });
   };
 
-  const handleSubmit = (e
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name || !formData.category) {
       toast({
@@ -95,9 +95,9 @@ export default function ProductsGrid({ products = [] }) {
     createProductMutation.mutate(formData);
   };
 
-  const toggleProductStatus = (productroduct) => {
+  const toggleProductStatus = (product) => {
     updateProductMutation.mutate({
-      idroduct.id,
+      id: product.id,
       updates: { isActive: !product.isActive }
     });
   };
