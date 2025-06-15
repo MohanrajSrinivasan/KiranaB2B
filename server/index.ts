@@ -1,2 +1,2 @@
-// Entry point for JavaScript server - delegates to start.js
-import('./start.js').catch(console.error);
+// Entry point for JavaScript server - using simplified server
+import('./simple-server.js').catch(console.error);

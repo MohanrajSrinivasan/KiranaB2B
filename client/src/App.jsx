@@ -12,7 +12,7 @@ import "../i18n/index.js";
 
 const queryClient = new QueryClient();
 
-function Router() {
+function AppRouter() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
@@ -29,7 +29,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router />
+        <AppRouter />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
