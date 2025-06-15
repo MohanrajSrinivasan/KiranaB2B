@@ -165,7 +165,7 @@
   
   /* Modern button styling inspired by Stripe */
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md;
+    @apply bg-primary text-white hover:bg-primary hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md;
   }
   
   .btn-secondary {
@@ -173,7 +173,7 @@
   }
   
   .btn-accent {
-    @apply bg-accent text-white hover:bg-accent/90 transition-all duration-200 shadow-sm hover:shadow-md;
+    @apply bg-accent text-white hover:bg-accent hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md;
   }
   
   /* Form input styling */
@@ -302,23 +302,23 @@
   
   /* Badge styling variations */
   .badge-primary {
-    @apply bg-primary/10 text-primary;
+    @apply bg-primary bg-opacity-10 text-primary;
   }
   
   .badge-accent {
-    @apply bg-accent/10 text-accent;
+    @apply bg-accent bg-opacity-10 text-accent;
   }
   
   .badge-warning {
-    @apply bg-yellow-500/10 text-yellow-600;
+    @apply bg-yellow-500 bg-opacity-10 text-yellow-600;
   }
   
   .badge-success {
-    @apply bg-green-500/10 text-green-600;
+    @apply bg-green-500 bg-opacity-10 text-green-600;
   }
   
   .badge-error {
-    @apply bg-red-500/10 text-red-600;
+    @apply bg-red-500 bg-opacity-10 text-red-600;
   }
   
   /* Scrollbar styling */
