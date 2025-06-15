@@ -102,8 +102,8 @@ export default function ProductsGrid({ products = [] }) {
     });
   };
 
-  const updateFormData = (fieldeyof ProductFormData, valueny) => {
-    setFormData(prev => ({ ...prev, [field]alue }));
+  const updateFormData = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const categories = ["Rice & Grains", "Flour & Grains", "Lentils & Pulses", "Spices", "Oil & Ghee"];
@@ -270,8 +270,7 @@ export default function ProductsGrid({ products = [] }) {
                 alt={product.name}
                 className="w-full h-48 object-cover"
                 onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = 'https://via.placeholder.com/400x250?text=No+Image';
+                  e.target.src = 'https://via.placeholder.com/400x250?text=No+Image';
                 }}
               />
               
