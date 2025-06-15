@@ -11,21 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Product } from "@/types";
 
-interface ProductsGridProps {
-  products?roduct[];
-}
-
-interface ProductFormData {
-  nametring;
-  descriptiontring;
-  imageUrltring;
-  categorytring;
-  stockumber;
-  tagstring[];
-  targetUserstring[];
-}
-
-export default function ProductsGrid({ products = [] }roductsGridProps) {
+export default function ProductsGrid({ products = [] }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -220,7 +206,7 @@ export default function ProductsGrid({ products = [] }roductsGridProps) {
                       onChange={(e) => {
                         const users = e.target.checked 
                           ? [...formData.targetUsers, 'retail']
-                          ormData.targetUsers.filter(u => u !== 'retail');
+                          : formData.targetUsers.filter(u => u !== 'retail');
                         updateFormData('targetUsers', users);
                       }}
                       className="mr-2"
@@ -234,7 +220,7 @@ export default function ProductsGrid({ products = [] }roductsGridProps) {
                       onChange={(e) => {
                         const users = e.target.checked 
                           ? [...formData.targetUsers, 'bulk']
-                          ormData.targetUsers.filter(u => u !== 'bulk');
+                          : formData.targetUsers.filter(u => u !== 'bulk');
                         updateFormData('targetUsers', users);
                       }}
                       className="mr-2"
