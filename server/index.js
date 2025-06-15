@@ -1,8 +1,10 @@
-const express = require('express');
-const session = require('express-session');
-const MemoryStore = require('memorystore')(session);
-const { registerRoutes } = require('./routes.js');
-const { setupVite, serveStatic, log } = require('./vite.js');
+import express from 'express';
+import session from 'express-session';
+import MemoryStore from 'memorystore';
+import { registerRoutes } from './routes.js';
+import { setupVite, serveStatic, log } from './vite.js';
+
+const MemoryStoreSession = MemoryStore(session);
 
 const app = express();
 app.use(express.json());
@@ -10,7 +12,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Session configuration
 app.use(session({
-  store: new MemoryStore({
+  store: new MemoryStoreSession({
     checkPeriod: 86400000 // prune expired entries every 24h
   }),
   secret: 'kiranaconnect-secret-key',

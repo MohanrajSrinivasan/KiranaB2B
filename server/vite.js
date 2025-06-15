@@ -1,6 +1,7 @@
-const fs = require("fs");
-const path = require("path");
-const { createServer } = require("vite");
+import fs from "fs";
+import path from "path";
+import { createServer } from "vite";
+import express from "express";
 
 function log(message, source = "express") {
   const time = new Date().toLocaleTimeString("en-US", {
@@ -37,10 +38,10 @@ function serveStatic(app) {
     );
   }
 
-  app.use(require("express").static(clientPath));
+  app.use(express.static(clientPath));
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(clientPath, "index.html"));
   });
 }
 
-module.exports = { log, setupVite, serveStatic };
+export { log, setupVite, serveStatic };

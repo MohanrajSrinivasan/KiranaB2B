@@ -350,5 +350,4 @@ class MemStorage {
   }
 }
 
-const storage = new MemStorage();
-module.exports = { storage };
+export const storage = new MemStorage();

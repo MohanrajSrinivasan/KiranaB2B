@@ -1,5 +1,5 @@
-const { createServer } = require('http');
-const { storage } = require('./storage.js');
+import { createServer } from 'http';
+import { storage } from './storage.js';
 
 async function registerRoutes(app) {
   // Authentication routes
@@ -358,4 +358,4 @@ async function registerRoutes(app) {
   return httpServer;
 }
 
-module.exports = { registerRoutes };
+export { registerRoutes };
