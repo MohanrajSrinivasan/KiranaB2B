@@ -1,2 +1,2 @@
-// Temporary TypeScript wrapper to start JavaScript server
-import('./index.js');
+// Entry point for JavaScript server
+import('./index.js').catch(console.error);
