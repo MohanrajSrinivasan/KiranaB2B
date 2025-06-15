@@ -107,7 +107,7 @@
   }
   
   .admin-nav-item.active {
-    @apply bg-primary/10 text-primary;
+    @apply bg-primary bg-opacity-10 text-primary;
   }
   
   /* Chart container styling */
@@ -135,7 +135,7 @@
   }
   
   .quantity-control button:hover {
-    @apply border-primary bg-primary/5 text-primary;
+    @apply border-primary bg-primary bg-opacity-5 text-primary;
   }
   
   /* Status badge base styles */
@@ -215,7 +215,7 @@
   }
   
   .sidebar-nav-item.active {
-    @apply bg-primary/10 text-primary border-r-2 border-primary;
+    @apply bg-primary bg-opacity-10 text-primary border-r-2 border-primary;
   }
   
   /* Table styling */
