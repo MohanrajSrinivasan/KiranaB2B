@@ -224,17 +224,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      const userId = req.session?.userId;
-      const userRole = req.session?.userRole;
-      
-      if (!userId) {
+      if (!req.isAuthenticated() || !req.user) {
         return res.status(401).json({ message: "Authentication required" });
       }
       
       const orderData = {
         ...insertOrderSchema.parse(req.body),
-        userId,
-        userType: userRole === 'vendor' ? 'vendor' : 'retail_user'
+        userId: req.user.id,
+        userType: req.user.role === 'vendor' ? 'vendor' : 'retail_user'
       };
       
       const order = await storage.createOrder(orderData);

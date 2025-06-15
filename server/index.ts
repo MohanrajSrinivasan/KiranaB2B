@@ -15,10 +15,10 @@ const app = express();
 app.use(session({
   secret: process.env.SESSION_SECRET || 'kiranaconnect-dev-secret-2024',
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   cookie: {
     secure: false, // Set to false for development
-    httpOnly: true,
+    httpOnly: false, // Allow frontend access for debugging
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
   }
