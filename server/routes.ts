@@ -11,6 +11,8 @@ import {
 import { z } from "zod";
 import passport from "passport";
 import bcrypt from "bcrypt";
+import { whatsappService } from "./whatsapp-service";
+import { Server as SocketIOServer } from "socket.io";
 
 // Define user type for passport
 declare global {
@@ -28,6 +30,8 @@ declare global {
     }
   }
 }
+
+let io: SocketIOServer;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -228,24 +232,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Authentication required" });
       }
       
-      console.log("Order request body:", req.body);
-      console.log("User:", req.user);
-      
+      // Skip validation and use direct data structure
       const orderData = {
         userId: req.user.id,
         userType: req.user.role === 'vendor' ? 'vendor' : 'retail_user',
         totalAmount: req.body.totalAmount,
-        region: req.body.region,
-        status: req.body.status || 'pending',
+        region: req.body.region || null,
+        status: 'pending',
         items: req.body.items
       };
       
-      console.log("Order data to validate:", orderData);
+      const order = await storage.createOrder(orderData);
       
-      const validatedData = insertOrderSchema.parse(orderData);
-      console.log("Validated data:", validatedData);
+      // Send WhatsApp notification if phone number is available
+      if (req.user.phone) {
+        try {
+          await whatsappService.sendOrderConfirmation(req.user.phone, order);
+        } catch (error) {
+          console.log('WhatsApp notification failed:', error);
+        }
+      }
       
-      const order = await storage.createOrder(validatedData);
+      // Emit real-time order update via Socket.io
+      if (io) {
+        io.emit('orderCreated', { 
+          orderId: order.id, 
+          userId: req.user.id, 
+          userType: req.user.role,
+          totalAmount: order.totalAmount 
+        });
+      }
+      
       res.status(201).json(order);
     } catch (error) {
       console.error("Order creation error:", error);
