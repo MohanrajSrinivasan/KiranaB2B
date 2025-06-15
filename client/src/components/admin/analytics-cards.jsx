@@ -1,17 +1,17 @@
 import { TrendingUp, ShoppingCart, Users, AlertTriangle } from "lucide-react";
 
 interface AnalyticsData {
-  totalRevenue: number;
-  totalOrders: number;
-  activeCustomers: number;
-  lowStockItems: number;
+  totalRevenueumber;
+  totalOrdersumber;
+  activeCustomersumber;
+  lowStockItemsumber;
 }
 
 interface AnalyticsCardsProps {
-  data?: AnalyticsData;
+  data?nalyticsData;
 }
 
-export default function AnalyticsCards({ data }: AnalyticsCardsProps) {
+export default function AnalyticsCards({ data }nalyticsCardsProps) {
   if (!data) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -34,31 +34,31 @@ export default function AnalyticsCards({ data }: AnalyticsCardsProps) {
     {
       title: "Total Revenue",
       value: `₹${data.totalRevenue?.toLocaleString() || 0}`,
-      icon: TrendingUp,
+      iconrendingUp,
       color: "primary",
       change: "+12.5%",
       changeText: "from last month",
     },
     {
       title: "Total Orders",
-      value: data.totalOrders?.toLocaleString() || 0,
-      icon: ShoppingCart,
+      valueata.totalOrders?.toLocaleString() || 0,
+      iconhoppingCart,
       color: "accent",
       change: "+8.2%",
       changeText: "from last month",
     },
     {
       title: "Active Customers",
-      value: data.activeCustomers?.toLocaleString() || 0,
-      icon: Users,
+      valueata.activeCustomers?.toLocaleString() || 0,
+      iconsers,
       color: "yellow-500",
       change: "+15.3%",
       changeText: "from last month",
     },
     {
       title: "Low Stock Items",
-      value: data.lowStockItems?.toLocaleString() || 0,
-      icon: AlertTriangle,
+      valueata.lowStockItems?.toLocaleString() || 0,
+      iconlertTriangle,
       color: "red-500",
       change: "Needs attention",
       changeText: "",
@@ -71,7 +71,7 @@ export default function AnalyticsCards({ data }: AnalyticsCardsProps) {
         <div key={index} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className={`p-2 bg-${card.color}/10 rounded-lg`}>
-              <card.icon className={`h-5 w-5 text-${card.color === 'primary' ? 'primary' : card.color === 'accent' ? 'accent' : card.color}`} />
+              <card.icon className={`h-5 w-5 text-${card.color === 'primary' ? 'primary' ard.color === 'accent' ? 'accent' ard.color}`} />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{card.title}</p>

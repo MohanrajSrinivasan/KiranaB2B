@@ -5,11 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Product, ProductVariant } from "@/types";
 
 interface BulkProductCardProps {
-  product: Product;
-  onAddToCart: (productId: number, variantId: number, quantity: number, variant: ProductVariant, productName: string) => void;
+  productroduct;
+  onAddToCart: (productIdumber, variantIdumber, quantityumber, variantroductVariant, productNametring) => void;
 }
 
-export default function BulkProductCard({ product, onAddToCart }: BulkProductCardProps) {
+export default function BulkProductCard({ product, onAddToCart }ulkProductCardProps) {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
 
@@ -34,7 +34,7 @@ export default function BulkProductCard({ product, onAddToCart }: BulkProductCar
     setQuantity(1); // Reset quantity after adding
   };
 
-  const adjustQuantity = (delta: number) => {
+  const adjustQuantity = (deltaumber) => {
     const minQuantity = selectedVariant?.minBulkQuantity || 1;
     setQuantity(prev => Math.max(minQuantity, prev + delta));
   };
@@ -164,7 +164,7 @@ export default function BulkProductCard({ product, onAddToCart }: BulkProductCar
             >
               {!product.inventory?.availableQuantity 
                 ? 'Out of Stock' 
-                : quantity < (selectedVariant.minBulkQuantity || 1)
+                uantity < (selectedVariant.minBulkQuantity || 1)
                 ? `Min ${selectedVariant.minBulkQuantity} required`
                 : 'Add to Cart'}
             </Button>

@@ -9,18 +9,18 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@/types";
 
 interface HeaderProps {
-  user: User;
+  userser;
   userType: 'admin' | 'retail' | 'kirana';
-  cartCount?: number;
+  cartCount?umber;
 }
 
-export default function Header({ user, userType, cartCount = 0 }: HeaderProps) {
+export default function Header({ user, userType, cartCount = 0 }eaderProps) {
   const [, setLocation] = useLocation();
   const { setUser } = useAuth();
   const { toast } = useToast();
 
   const logoutMutation = useMutation({
-    mutationFn: async () => {
+    mutationFnsync () => {
       const response = await apiRequest('POST', '/api/auth/logout', {});
       return response.json();
     },
@@ -40,19 +40,19 @@ export default function Header({ user, userType, cartCount = 0 }: HeaderProps) {
 
   const getUserTypeLabel = () => {
     switch (userType) {
-      case 'admin': return 'Admin';
-      case 'retail': return 'Retail';
-      case 'kirana': return 'Kirana';
-      default: return '';
+      case 'admin'eturn 'Admin';
+      case 'retail'eturn 'Retail';
+      case 'kirana'eturn 'Kirana';
+      defaulteturn '';
     }
   };
 
   const getUserTypeColor = () => {
     switch (userType) {
-      case 'admin': return 'bg-primary/10 text-primary';
-      case 'retail': return 'bg-accent/10 text-accent';
-      case 'kirana': return 'bg-yellow-500/10 text-yellow-600';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'admin'eturn 'bg-primary/10 text-primary';
+      case 'retail'eturn 'bg-accent/10 text-accent';
+      case 'kirana'eturn 'bg-yellow-500/10 text-yellow-600';
+      defaulteturn 'bg-gray-100 text-gray-800';
     }
   };
 

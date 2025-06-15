@@ -12,20 +12,20 @@ import { useToast } from "@/hooks/use-toast";
 import { Product } from "@/types";
 
 interface ProductsGridProps {
-  products?: Product[];
+  products?roduct[];
 }
 
 interface ProductFormData {
-  name: string;
-  description: string;
-  imageUrl: string;
-  category: string;
-  stock: number;
-  tags: string[];
-  targetUsers: string[];
+  nametring;
+  descriptiontring;
+  imageUrltring;
+  categorytring;
+  stockumber;
+  tagstring[];
+  targetUserstring[];
 }
 
-export default function ProductsGrid({ products = [] }: ProductsGridProps) {
+export default function ProductsGrid({ products = [] }roductsGridProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -33,14 +33,14 @@ export default function ProductsGrid({ products = [] }: ProductsGridProps) {
     imageUrl: "",
     category: "",
     stock: 0,
-    tags: [],
-    targetUsers: [],
+    tags,
+    targetUsers,
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const createProductMutation = useMutation({
-    mutationFn: async (productData: ProductFormData) => {
+    mutationFnsync (productDataroductFormData) => {
       const response = await apiRequest('POST', '/api/products', productData);
       return response.json();
     },
@@ -51,7 +51,7 @@ export default function ProductsGrid({ products = [] }: ProductsGridProps) {
       });
       setIsAddDialogOpen(false);
       resetForm();
-      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey'/api/products'] });
     },
     onError: () => {
       toast({
@@ -63,7 +63,7 @@ export default function ProductsGrid({ products = [] }: ProductsGridProps) {
   });
 
   const updateProductMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Product> }) => {
+    mutationFnsync ({ id, updates }: { idumber; updatesartial<Product> }) => {
       const response = await apiRequest('PUT', `/api/products/${id}`, updates);
       return response.json();
     },
@@ -72,7 +72,7 @@ export default function ProductsGrid({ products = [] }: ProductsGridProps) {
         title: "Product updated",
         description: "Product has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey'/api/products'] });
     },
     onError: () => {
       toast({
@@ -90,12 +90,12 @@ export default function ProductsGrid({ products = [] }: ProductsGridProps) {
       imageUrl: "",
       category: "",
       stock: 0,
-      tags: [],
-      targetUsers: [],
+      tags,
+      targetUsers,
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e
     e.preventDefault();
     if (!formData.name || !formData.category) {
       toast({
@@ -109,15 +109,15 @@ export default function ProductsGrid({ products = [] }: ProductsGridProps) {
     createProductMutation.mutate(formData);
   };
 
-  const toggleProductStatus = (product: Product) => {
+  const toggleProductStatus = (productroduct) => {
     updateProductMutation.mutate({
-      id: product.id,
+      idroduct.id,
       updates: { isActive: !product.isActive }
     });
   };
 
-  const updateFormData = (field: keyof ProductFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const updateFormData = (fieldeyof ProductFormData, valueny) => {
+    setFormData(prev => ({ ...prev, [field]alue }));
   };
 
   const categories = ["Rice & Grains", "Flour & Grains", "Lentils & Pulses", "Spices", "Oil & Ghee"];
@@ -220,7 +220,7 @@ export default function ProductsGrid({ products = [] }: ProductsGridProps) {
                       onChange={(e) => {
                         const users = e.target.checked 
                           ? [...formData.targetUsers, 'retail']
-                          : formData.targetUsers.filter(u => u !== 'retail');
+                          ormData.targetUsers.filter(u => u !== 'retail');
                         updateFormData('targetUsers', users);
                       }}
                       className="mr-2"
@@ -234,7 +234,7 @@ export default function ProductsGrid({ products = [] }: ProductsGridProps) {
                       onChange={(e) => {
                         const users = e.target.checked 
                           ? [...formData.targetUsers, 'bulk']
-                          : formData.targetUsers.filter(u => u !== 'bulk');
+                          ormData.targetUsers.filter(u => u !== 'bulk');
                         updateFormData('targetUsers', users);
                       }}
                       className="mr-2"

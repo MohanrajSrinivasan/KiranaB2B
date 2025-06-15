@@ -5,11 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Product, ProductVariant } from "@/types";
 
 interface ProductCardProps {
-  product: Product;
-  onAddToCart: (productId: number, variantId: number, quantity: number, variant: ProductVariant, productName: string) => void;
+  productroduct;
+  onAddToCart: (productIdumber, variantIdumber, quantityumber, variantroductVariant, productNametring) => void;
 }
 
-export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
+export default function ProductCard({ product, onAddToCart }roductCardProps) {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     product.variants?.[0] || null
   );
@@ -22,7 +22,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
     setQuantity(1); // Reset quantity after adding
   };
 
-  const adjustQuantity = (delta: number) => {
+  const adjustQuantity = (deltaumber) => {
     setQuantity(prev => Math.max(1, prev + delta));
   };
 

@@ -8,10 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Order } from "@/types";
 
 interface OrdersTableProps {
-  orders?: Order[];
+  orders?rder[];
 }
 
-export default function OrdersTable({ orders = [] }: OrdersTableProps) {
+export default function OrdersTable({ orders = [] }rdersTableProps) {
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -20,7 +20,7 @@ export default function OrdersTable({ orders = [] }: OrdersTableProps) {
   const queryClient = useQueryClient();
 
   const updateOrderMutation = useMutation({
-    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
+    mutationFnsync ({ orderId, status }: { orderIdumber; statustring }) => {
       const response = await apiRequest('PUT', `/api/orders/${orderId}`, { status });
       return response.json();
     },
@@ -29,7 +29,7 @@ export default function OrdersTable({ orders = [] }: OrdersTableProps) {
         title: "Order updated",
         description: "Order status has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey'/api/orders'] });
     },
     onError: () => {
       toast({
@@ -50,18 +50,18 @@ export default function OrdersTable({ orders = [] }: OrdersTableProps) {
     return matchesType && matchesStatus && matchesDateFrom && matchesDateTo;
   });
 
-  const handleStatusChange = (orderId: number, newStatus: string) => {
-    updateOrderMutation.mutate({ orderId, status: newStatus });
+  const handleStatusChange = (orderIdumber, newStatustring) => {
+    updateOrderMutation.mutate({ orderId, statusewStatus });
   };
 
   const handleExportCSV = () => {
     const csvData = filteredOrders.map(order => ({
       OrderID: `#${order.id}`,
-      Customer: order.customer?.shopName || order.customer?.name || 'N/A',
-      Type: order.userType === 'vendor' ? 'Kirana' : 'Retail',
+      Customerrder.customer?.shopName || order.customer?.name || 'N/A',
+      Typerder.userType === 'vendor' ? 'Kirana' : 'Retail',
       Amount: `₹${order.totalAmount}`,
-      Status: order.status,
-      Date: new Date(order.createdAt).toLocaleDateString(),
+      Statusrder.status,
+      Dateew Date(order.createdAt).toLocaleDateString(),
     }));
 
     const csvContent = [

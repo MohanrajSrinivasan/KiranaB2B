@@ -11,12 +11,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
 interface LoginModalProps {
-  isOpen: boolean;
+  isOpenoolean;
   onClose: () => void;
   onSwitchToRegister: () => void;
 }
 
-export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, onSwitchToRegister }oginModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -25,7 +25,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
   const [, setLocation] = useLocation();
 
   const loginMutation = useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+    mutationFnsync ({ email, password }: { emailtring; passwordtring }) => {
       const response = await apiRequest('POST', '/api/auth/login', { email, password });
       return response.json();
     },
@@ -42,16 +42,16 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
                            data.user.role === 'vendor' ? '/kirana' : '/retail';
       setLocation(dashboardRoute);
     },
-    onError: (error: any) => {
+    onError: (errorny) => {
       toast({
         title: "Login failed",
-        description: error.message || "Invalid email or password",
+        descriptionrror.message || "Invalid email or password",
         variant: "destructive",
       });
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e
     e.preventDefault();
     if (!email || !password) {
       toast({
@@ -64,7 +64,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
     loginMutation.mutate({ email, password });
   };
 
-  const handleDemoLogin = (role: string) => {
+  const handleDemoLogin = (roletring) => {
     const demoCredentials = {
       admin: { email: "admin@kiranaconnect.com", password: "admin123" },
       vendor: { email: "vendor@example.com", password: "vendor123" },

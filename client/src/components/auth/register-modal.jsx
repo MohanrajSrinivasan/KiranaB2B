@@ -11,12 +11,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
 interface RegisterModalProps {
-  isOpen: boolean;
+  isOpenoolean;
   onClose: () => void;
   onSwitchToLogin: () => void;
 }
 
-export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps) {
+export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }egisterModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -31,7 +31,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
   const [, setLocation] = useLocation();
 
   const registerMutation = useMutation({
-    mutationFn: async (userData: typeof formData) => {
+    mutationFnsync (userDataypeof formData) => {
       const response = await apiRequest('POST', '/api/auth/register', userData);
       return response.json();
     },
@@ -48,16 +48,16 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                            data.user.role === 'vendor' ? '/kirana' : '/retail';
       setLocation(dashboardRoute);
     },
-    onError: (error: any) => {
+    onError: (errorny) => {
       toast({
         title: "Registration failed",
-        description: error.message || "Unable to create account. Please try again.",
+        descriptionrror.message || "Unable to create account. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e
     e.preventDefault();
     
     // Validation
@@ -82,8 +82,8 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
     registerMutation.mutate(formData);
   };
 
-  const updateFormData = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const updateFormData = (fieldtring, valuetring) => {
+    setFormData(prev => ({ ...prev, [field]alue }));
   };
 
   return (
