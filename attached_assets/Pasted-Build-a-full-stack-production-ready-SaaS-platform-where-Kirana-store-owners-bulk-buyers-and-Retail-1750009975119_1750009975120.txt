@@ -1,0 +1,263 @@
+Build a full-stack production-ready SaaS platform where Kirana store owners (bulk buyers) and Retail users can place orders from a distributor (admin).
+
+The application must have:
+
+Full analytics dashboard
+
+WhatsApp integration for order status
+
+Multilingual support (Tamil and English)
+
+Cloudinary for image uploads
+
+Stripe-style modern SCSS design
+
+SEO configuration for public-facing pages
+
+Inventory + stock management
+
+Separate dashboards for Kirana (bulk) and Retail
+
+🔧 Tech Stack
+Layer	Stack
+Frontend	React + TypeScript + SCSS (Stripe-style)
+Backend	Node.js + Express
+Database	MongoDB + Mongoose
+Auth	JWT-based with role access
+Realtime	Socket.io
+Image Upload	Cloudinary
+Messaging	Twilio WhatsApp API
+PDF/Export	jsPDF / Puppeteer
+SEO	React Helmet + SSR-ready setup
+i18n	react-i18next or next-i18next for Tamil
+
+👥 Roles
+Retail User (retail_user)
+
+Kirana Vendor (vendor)
+
+Distributor / Admin (admin)
+
+🛒 Customer (Retail + Kirana) Features:
+Login / Register
+
+View product catalog (with image, variants, quantity, price)
+
+Real-time pricing & availability
+
+Add to cart, place orders
+
+View order history
+
+Download invoices (PDF)
+
+Track status:
+
+"Pending → Accepted → Packed → Shipped → Delivered"
+
+Get order updates via WhatsApp
+
+Multilingual support (Tamil, English)
+
+Repeat previous orders
+
+Low-stock alert (user side)
+
+Product-level search and category filters
+
+Region-based filter (filter distributors by region)
+
+📈 Admin (Distributor) Dashboard:
+📊 Analytics Dashboard
+Must support segregated analytics for Retail and Kirana:
+
+Top-selling products (split by Kirana / Retail)
+
+Most active vendors
+
+Most valuable retail customers
+
+Revenue trends (by day/week/month)
+
+Revenue by region and user type
+
+Average order value by user type
+
+Daily/weekly/monthly order count
+
+Cancelled vs fulfilled orders ratio
+
+Stock value vs Sold value
+
+Heatmap of activity by region
+
+Use charts via Recharts or Chart.js.
+
+🧾 Order Management (Admin):
+Filter by:
+
+Order type (retail, kirana)
+
+Region
+
+Date range
+
+Status
+
+Total value
+
+Update order status (realtime + WhatsApp)
+
+Export to CSV or PDF
+
+Generate packing slips (PDF)
+
+View customer profiles + order frequency
+
+🛍️ Product & Stock Management:
+Add / edit / delete products
+
+Upload images via Cloudinary
+
+Define quantity-based pricing (e.g., per 1kg, per box)
+
+Toggle product availability
+
+Add tags or categories
+
+Auto-restock alert for low inventory
+
+View stock history & adjustment log
+
+📦 Inventory & Stock Management:
+Set minimum stock levels
+
+Alert when low
+
+Auto-disable product if out-of-stock
+
+Track:
+
+Available quantity
+
+Sold quantity
+
+Returned quantity
+
+Manage incoming shipment dates
+
+Categorize stock as Retail or Bulk
+
+💬 WhatsApp Integration (Twilio):
+On status change, trigger:
+
+css
+Copy
+Edit
+Hello [User],
+Your order #[ID] is now [Status].
+Expected delivery: [Date]
+Thank you!
+🌐 SEO-Ready + Multilingual:
+All public pages should be SEO optimized:
+
+Use React Helmet
+
+Use semantic tags, dynamic titles
+
+Add sitemap.xml and robots.txt
+
+Add meta og: tags for social previews
+
+Use react-i18next with dynamic switch:
+
+Default: English
+
+Tamil: /ta
+
+Translate buttons, labels, messages
+
+📂 SCSS Styling (Stripe-Inspired):
+Folder structure:
+
+csharp
+Copy
+Edit
+styles/
+├── base/
+├── components/
+├── pages/
+├── utils/
+└── main.scss
+Colors:
+
+Primary: #635bff
+
+Accent: #00c896
+
+Background: #f6f9fc
+
+Text: #32325d
+
+🔑 Auth & Access
+JWT with role-based access
+
+Secure endpoints for each role
+
+Admin can impersonate users (view their dashboards)
+
+Optional: Phone OTP login (for future scale)
+
+🧠 Bonus Capabilities (Optional):
+Credit purchase system for Kirana
+
+Suggest restock items based on buying pattern
+
+AI-based price forecasting
+
+WhatsApp chatbot integration
+
+Role for sub-admins (e.g., delivery manager, packer)
+
+Scheduled report mails (daily/weekly)
+
+🧱 Database Models (Simplified)
+User
+js
+Copy
+Edit
+{
+  name, email, passwordHash, role: "vendor" | "retail_user" | "admin",
+  phone, shopName, region, createdAt
+}
+Product
+js
+Copy
+Edit
+{
+  name, description, imageUrl, category, isActive: true,
+  stock, tags: ["atta", "flour"],
+  variants: [{ label: "1kg", price: 32 }],
+  targetUsers: ["retail", "bulk"]
+}
+Order
+js
+Copy
+Edit
+{
+  userId, userType: "vendor" | "retail_user",
+  items: [{ productId, label, qty, unitPrice }],
+  totalAmount, region, status, createdAt
+}
+✅ Deployable Structure
+Full foldered React + Express setup
+
+Modular Mongoose models
+
+RESTful APIs with separation
+
+Replit-compatible build with Cloudinary, Twilio, MongoDB
+
+✅ Final Instruction
+This should be built as a fully functioning multi-role B2B + B2C SaaS with modern dashboard UI and robust backend.
+It must be mobile responsive, SEO-friendly, and Tamil-compatible for South Indian vendors and retail customers.
