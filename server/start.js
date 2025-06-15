@@ -67,14 +67,14 @@ async function startServer() {
     await seedDatabase();
     console.log("Database seeded successfully");
   } catch (error) {
-    if (error.message.includes("already exists")) {
-      console.log("Database already seeded");
+    if (error.message && error.message.includes("already exists")) {
+      console.log("Database already seeded, skipping...");
     } else {
       console.error("Database seeding failed:", error);
     }
   }
 
-  app.use((err, _req, res, _next) => {
+  app.use((err, req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
     res.status(status).json({ message });
@@ -94,4 +94,4 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch(console.error);
