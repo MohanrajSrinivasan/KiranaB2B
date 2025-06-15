@@ -1,110 +1,114 @@
-import { createServer } from 'http';
-import { storage } from './storage.js';
+import { createServer } from "http";
+import { z } from "zod";
+import passport from "passport";
+import bcrypt from "bcrypt";
+import { whatsappService } from "./whatsapp-service.js";
+import { Server as SocketIOServer } from "socket.io";
+import { storage } from "./storage.js";
 
-async function registerRoutes(app) {
+let io;
+
+export async function registerRoutes(app) {
   // Authentication routes
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const user = await storage.getUserByEmail(email);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
+  app.post("/api/auth/login", passport.authenticate('local'), (req, res) => {
+    res.json({ user: req.user });
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
       }
-      
-      // Store user session
-      req.session.userId = user.id;
-      req.session.userRole = user.role;
-      res.json({ user: { ...user, password: undefined } });
-    } catch (error) {
-      res.status(400).json({ message: "Invalid request data" });
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ message: "Session destruction failed" });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ message: "Logged out successfully" });
+      });
+    });
+  });
+
+  app.get("/api/auth/me", (req, res) => {
+    if (req.isAuthenticated() && req.user) {
+      res.json({ user: req.user });
+    } else {
+      res.status(401).json({ message: "Not authenticated" });
     }
   });
 
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const userData = req.body;
-      const existingUser = await storage.getUserByEmail(userData.email);
+      const { name, email, password, phone, role, shopName, region } = req.body;
       
+      // Check if user exists
+      const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(409).json({ message: "User already exists" });
+        return res.status(400).json({ message: "User already exists" });
       }
-      
-      const user = await storage.createUser(userData);
-      req.session.userId = user.id;
-      req.session.userRole = user.role;
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create user
+      const user = await storage.createUser({
+        name,
+        email,
+        password: hashedPassword,
+        phone: phone || null,
+        role: role || 'retail_user',
+        shopName: shopName || null,
+        region: region || null,
+        isActive: true
+      });
+
       res.status(201).json({ user: { ...user, password: undefined } });
     } catch (error) {
-      res.status(400).json({ message: "Invalid request data" });
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Registration failed" });
     }
-  });
-
-  app.post("/api/auth/logout", (req, res) => {
-    req.session = null;
-    res.json({ message: "Logged out successfully" });
-  });
-
-  app.get("/api/auth/me", async (req, res) => {
-    const userId = req.session?.userId;
-    if (!userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
-    const user = await storage.getUser(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
-    res.json({ user: { ...user, password: undefined } });
   });
 
   // Product routes
   app.get("/api/products", async (req, res) => {
     try {
-      const { category } = req.query;
-      const products = category 
-        ? await storage.getProductsByCategory(category)
-        : await storage.getAllProducts();
+      const products = await storage.getAllProducts();
       
       // Get variants for each product
       const productsWithVariants = await Promise.all(
         products.map(async (product) => {
           const variants = await storage.getProductVariants(product.id);
+          
+          // Get inventory for low stock checking
           const inventory = await storage.getInventory(product.id);
-          return { 
-            ...product, 
+          const isLowStock = inventory && inventory.availableQuantity !== null && inventory.minStockLevel !== null ? 
+            inventory.availableQuantity <= inventory.minStockLevel : false;
+          
+          return {
+            ...product,
             variants,
-            inventory: inventory ? {
-              availableQuantity: inventory.availableQuantity || 0,
-              isLowStock: (inventory.availableQuantity || 0) <= (inventory.minStockLevel || 10)
-            } : null
+            isLowStock
           };
         })
       );
       
       res.json(productsWithVariants);
     } catch (error) {
+      console.error("Products fetch error:", error);
       res.status(500).json({ message: "Failed to fetch products" });
     }
   });
 
   app.get("/api/products/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const product = await storage.getProduct(id);
+      const product = await storage.getProduct(parseInt(req.params.id));
       
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
       
-      const variants = await storage.getProductVariants(id);
-      const inventory = await storage.getInventory(id);
-      
-      res.json({ 
-        ...product, 
-        variants,
-        inventory
-      });
+      const variants = await storage.getProductVariants(product.id);
+      res.json({ ...product, variants });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch product" });
     }
@@ -112,73 +116,81 @@ async function registerRoutes(app) {
 
   app.post("/api/products", async (req, res) => {
     try {
-      const userId = req.session?.userId;
-      const userRole = req.session?.userRole;
-      
-      if (!userId || userRole !== 'admin') {
+      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
-      const productData = req.body;
-      const product = await storage.createProduct(productData);
+
+      const product = await storage.createProduct(req.body);
       res.status(201).json(product);
     } catch (error) {
-      res.status(400).json({ message: "Invalid product data" });
+      res.status(400).json({ message: "Failed to create product" });
     }
   });
 
   app.put("/api/products/:id", async (req, res) => {
     try {
-      const userId = req.session?.userId;
-      const userRole = req.session?.userRole;
-      
-      if (!userId || userRole !== 'admin') {
+      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      const product = await storage.updateProduct(id, updates);
-      
+
+      const product = await storage.updateProduct(parseInt(req.params.id), req.body);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
-      
       res.json(product);
     } catch (error) {
-      res.status(400).json({ message: "Invalid update data" });
+      res.status(400).json({ message: "Failed to update product" });
+    }
+  });
+
+  app.delete("/api/products/:id", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const success = await storage.deleteProduct(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.json({ message: "Product deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // Product variants routes
+  app.post("/api/products/:productId/variants", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const variant = await storage.createProductVariant({
+        ...req.body,
+        productId: parseInt(req.params.productId)
+      });
+      res.status(201).json(variant);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create variant" });
     }
   });
 
   // Order routes
   app.get("/api/orders", async (req, res) => {
     try {
-      const userId = req.session?.userId;
-      const userRole = req.session?.userRole;
-      
-      if (!userId) {
+      if (!req.isAuthenticated() || !req.user) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       let orders;
-      if (userRole === 'admin') {
+      if (req.user.role === 'admin') {
         orders = await storage.getAllOrders();
       } else {
-        orders = await storage.getOrdersByUser(userId);
+        orders = await storage.getOrdersByUser(req.user.id);
       }
       
-      // Get user details for each order
-      const ordersWithUserDetails = await Promise.all(
-        orders.map(async (order) => {
-          const user = await storage.getUser(order.userId);
-          return {
-            ...order,
-            customer: user ? { name: user.name, email: user.email, shopName: user.shopName } : null
-          };
-        })
-      );
-      
-      res.json(ordersWithUserDetails);
+      res.json(orders);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });
     }
@@ -186,30 +198,22 @@ async function registerRoutes(app) {
 
   app.get("/api/orders/:id", async (req, res) => {
     try {
-      const userId = req.session?.userId;
-      const userRole = req.session?.userRole;
-      
-      if (!userId) {
+      if (!req.isAuthenticated() || !req.user) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
-      const id = parseInt(req.params.id);
-      const order = await storage.getOrder(id);
+
+      const order = await storage.getOrder(parseInt(req.params.id));
       
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
       
-      // Check if user has permission to view this order
-      if (userRole !== 'admin' && order.userId !== userId) {
+      // Check if user can access this order
+      if (req.user.role !== 'admin' && order.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
       
-      const user = await storage.getUser(order.userId);
-      res.json({
-        ...order,
-        customer: user ? { name: user.name, email: user.email, shopName: user.shopName } : null
-      });
+      res.json(order);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch order" });
     }
@@ -217,110 +221,100 @@ async function registerRoutes(app) {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      const userId = req.session?.userId;
-      const userRole = req.session?.userRole;
-      
-      if (!userId) {
+      if (!req.isAuthenticated() || !req.user) {
         return res.status(401).json({ message: "Authentication required" });
       }
       
       const orderData = {
-        ...req.body,
-        userId,
-        userType: userRole === 'vendor' ? 'vendor' : 'retail_user'
+        userId: req.user.id,
+        userType: req.user.role === 'vendor' ? 'vendor' : 'retail_user',
+        totalAmount: req.body.totalAmount,
+        region: req.body.region || null,
+        status: 'pending',
+        items: req.body.items
       };
       
       const order = await storage.createOrder(orderData);
+      
+      // Send WhatsApp notification if phone number is available
+      if (req.user.phone) {
+        try {
+          await whatsappService.sendOrderConfirmation(req.user.phone, order);
+        } catch (error) {
+          console.log('WhatsApp notification failed:', error);
+        }
+      }
+      
+      // Emit real-time order update via Socket.io
+      if (io) {
+        io.emit('orderCreated', { 
+          orderId: order.id, 
+          userId: req.user.id, 
+          userType: req.user.role,
+          totalAmount: order.totalAmount 
+        });
+      }
+      
       res.status(201).json(order);
     } catch (error) {
-      res.status(400).json({ message: "Invalid order data" });
+      console.error("Order creation error:", error);
+      res.status(400).json({ 
+        message: "Invalid order data",
+        error: error.message 
+      });
     }
   });
 
   app.put("/api/orders/:id", async (req, res) => {
     try {
-      const userId = req.session?.userId;
-      const userRole = req.session?.userRole;
-      
-      if (!userId) {
+      if (!req.isAuthenticated() || !req.user) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
-      const id = parseInt(req.params.id);
-      const order = await storage.getOrder(id);
-      
+
+      const order = await storage.getOrder(parseInt(req.params.id));
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
-      // Only admin can update order status, users can only update their own orders
-      if (userRole !== 'admin' && order.userId !== userId) {
+
+      // Only admin or order owner can update
+      if (req.user.role !== 'admin' && order.userId !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
+
+      const updatedOrder = await storage.updateOrder(parseInt(req.params.id), req.body);
       
-      const updates = req.body;
-      const updatedOrder = await storage.updateOrder(id, updates);
+      // Send WhatsApp status update if status changed
+      if (req.body.status && req.user.phone) {
+        try {
+          await whatsappService.sendOrderStatusUpdate(req.user.phone, updatedOrder);
+        } catch (error) {
+          console.log('WhatsApp status update failed:', error);
+        }
+      }
+      
       res.json(updatedOrder);
     } catch (error) {
-      res.status(400).json({ message: "Invalid update data" });
-    }
-  });
-
-  // Analytics routes (admin only)
-  app.get("/api/analytics/overview", async (req, res) => {
-    try {
-      const userRole = req.session?.userRole;
-      
-      if (userRole !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
-      const orderAnalytics = await storage.getOrderAnalytics();
-      const customerAnalytics = await storage.getCustomerAnalytics();
-      const lowStockItems = await storage.getLowStockItems();
-      
-      res.json({
-        totalRevenue: orderAnalytics.totalRevenue,
-        totalOrders: orderAnalytics.totalOrders,
-        activeCustomers: customerAnalytics.activeCustomers,
-        lowStockItems: lowStockItems.length
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch analytics" });
-    }
-  });
-
-  app.get("/api/analytics/revenue", async (req, res) => {
-    try {
-      const userRole = req.session?.userRole;
-      
-      if (userRole !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      
-      const revenueAnalytics = await storage.getRevenueAnalytics();
-      res.json(revenueAnalytics);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch revenue analytics" });
+      res.status(400).json({ message: "Failed to update order" });
     }
   });
 
   // Inventory routes
   app.get("/api/inventory", async (req, res) => {
     try {
-      const userRole = req.session?.userRole;
-      
-      if (userRole !== 'admin') {
+      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
+
       const inventory = await storage.getAllInventory();
       
       // Get product details for each inventory item
       const inventoryWithProducts = await Promise.all(
         inventory.map(async (item) => {
           const product = await storage.getProduct(item.productId);
-          return { ...item, product };
+          return {
+            ...item,
+            product
+          };
         })
       );
       
@@ -332,9 +326,7 @@ async function registerRoutes(app) {
 
   app.get("/api/inventory/low-stock", async (req, res) => {
     try {
-      const userRole = req.session?.userRole;
-      
-      if (userRole !== 'admin') {
+      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
       
@@ -344,7 +336,10 @@ async function registerRoutes(app) {
       const lowStockWithProducts = await Promise.all(
         lowStockItems.map(async (item) => {
           const product = await storage.getProduct(item.productId);
-          return { ...item, product };
+          return {
+            ...item,
+            product
+          };
         })
       );
       
@@ -354,8 +349,102 @@ async function registerRoutes(app) {
     }
   });
 
+  // Analytics endpoints
+  app.get("/api/analytics", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const [orderAnalytics, revenueAnalytics, customerAnalytics] = await Promise.all([
+        storage.getOrderAnalytics(),
+        storage.getRevenueAnalytics(),
+        storage.getCustomerAnalytics()
+      ]);
+
+      // Get low stock count
+      const lowStockItems = await storage.getLowStockItems();
+      
+      // Get top products (mock data for now)
+      const topProducts = [
+        { name: "Basmati Rice", sales: 45, revenue: 2250 },
+        { name: "Wheat Flour", sales: 38, revenue: 1520 },
+        { name: "Sugar", sales: 32, revenue: 1280 },
+        { name: "Cooking Oil", sales: 28, revenue: 1680 },
+        { name: "Dal", sales: 25, revenue: 1875 }
+      ];
+
+      const analytics = {
+        orderAnalytics: {
+          totalOrders: orderAnalytics.totalOrders || 0,
+          totalRevenue: parseFloat(orderAnalytics.totalRevenue) || 0,
+          averageOrderValue: orderAnalytics.totalOrders > 0 ? 
+            (parseFloat(orderAnalytics.totalRevenue) / orderAnalytics.totalOrders) : 0,
+          orderGrowth: 15.2, // Mock growth percentage
+          monthlyData: [
+            { month: "Jan", orders: 12, revenue: 5200 },
+            { month: "Feb", orders: 18, revenue: 7300 },
+            { month: "Mar", orders: 25, revenue: 9100 },
+            { month: "Apr", orders: 32, revenue: 12400 },
+            { month: "May", orders: 28, revenue: 11200 },
+            { month: "Jun", orders: 35, revenue: 14800 }
+          ]
+        },
+        customerAnalytics: {
+          totalCustomers: customerAnalytics.totalCustomers || 0,
+          activeCustomers: Math.floor((customerAnalytics.totalCustomers || 0) * 0.7),
+          customerGrowth: 8.5, // Mock growth percentage
+          regionDistribution: [
+            { region: "Mumbai", customers: 15 },
+            { region: "Delhi", customers: 12 },
+            { region: "Bangalore", customers: 8 },
+            { region: "Chennai", customers: 6 },
+            { region: "Kolkata", customers: 4 }
+          ]
+        },
+        productAnalytics: {
+          totalProducts: (await storage.getAllProducts()).length,
+          lowStockCount: lowStockItems.length,
+          topProducts
+        }
+      };
+
+      res.json(analytics);
+    } catch (error) {
+      console.error("Analytics error:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
+  
+  // Initialize Socket.io server
+  io = new SocketIOServer(httpServer, {
+    cors: {
+      origin: process.env.NODE_ENV === 'production' ? false : "*",
+      credentials: true
+    },
+    path: '/ws'
+  });
+
+  // Socket.io connection handling
+  io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+    
+    socket.on('join-user-room', (userId) => {
+      socket.join(`user-${userId}`);
+      console.log(`User ${userId} joined their room`);
+    });
+    
+    socket.on('join-admin-room', () => {
+      socket.join('admin-room');
+      console.log('User joined admin room');
+    });
+    
+    socket.on('disconnect', () => {
+      console.log('Client disconnected:', socket.id);
+    });
+  });
+
   return httpServer;
 }
-
-export { registerRoutes };

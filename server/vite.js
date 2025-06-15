@@ -1,47 +1,63 @@
-import fs from "fs";
-import path from "path";
-import { createServer } from "vite";
-import express from "express";
+import { createServer as createViteServer } from "vite";
 
-function log(message, source = "express") {
-  const time = new Date().toLocaleTimeString("en-US", {
+export function log(message, source = "express") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour12: false,
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
     second: "2-digit",
   });
-  console.log(`${time} [${source}] ${message}`);
+
+  console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-async function setupVite(app, server) {
-  const vite = await createServer({
+export async function setupVite(app, server) {
+  const vite = await createViteServer({
     server: {
       middlewareMode: true,
-      hmr: { server },
-      allowedHosts: true,
+      hmr: { server }
     },
     appType: "spa",
-    root: "client",
-    publicDir: path.resolve("client", "public"),
   });
 
   app.use(vite.ssrFixStacktrace);
   app.use(vite.middlewares);
-}
 
-function serveStatic(app) {
-  const clientPath = path.resolve("client", "dist");
+  app.use("*", async (req, res, next) => {
+    const url = req.originalUrl;
 
-  if (!fs.existsSync(clientPath)) {
-    throw new Error(
-      `Could not find client build directory at ${clientPath}. Please run "npm run build" first.`
-    );
-  }
+    try {
+      let template = await vite.transformIndexHtml(url, `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KiranaConnect</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+      `);
 
-  app.use(express.static(clientPath));
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(clientPath, "index.html"));
+      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+    } catch (e) {
+      vite.ssrFixStacktrace(e);
+      next(e);
+    }
   });
+
+  log("Vite server setup complete");
 }
 
-export { log, setupVite, serveStatic };
+export function serveStatic(app) {
+  app.use(express.static("dist"));
+  
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve("dist", "index.html"));
+  });
+  
+  log("Static file serving setup complete");
+}
