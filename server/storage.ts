@@ -100,6 +100,35 @@ export class MemStorage implements IStorage {
     };
     this.users.set(admin.id, admin);
 
+    // Create demo users
+    const vendor: User = {
+      id: this.currentUserId++,
+      name: "Ravi Kumar",
+      email: "vendor@example.com",
+      password: "vendor123",
+      phone: "+91 98765 12345",
+      role: "vendor",
+      shopName: "Ravi General Store",
+      region: "Chennai",
+      isActive: true,
+      createdAt: new Date(),
+    };
+    this.users.set(vendor.id, vendor);
+
+    const retail: User = {
+      id: this.currentUserId++,
+      name: "Priya Sharma",
+      email: "retail@example.com",
+      password: "retail123",
+      phone: "+91 98765 67890",
+      role: "retail_user",
+      shopName: null,
+      region: "Chennai",
+      isActive: true,
+      createdAt: new Date(),
+    };
+    this.users.set(retail.id, retail);
+
     // Create sample products
     const products = [
       {
