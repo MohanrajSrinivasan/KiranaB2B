@@ -8,7 +8,7 @@ import KiranaDashboard from "@/pages/kirana-dashboard";
 import RetailDashboard from "@/pages/retail-dashboard";
 import AnalyticsDashboard from "@/pages/analytics-dashboard";
 import NotFound from "@/pages/not-found";
-import "../i18n/index.js";
+import "./i18n/index.js";
 
 const queryClient = new QueryClient();
 
