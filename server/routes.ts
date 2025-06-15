@@ -9,24 +9,30 @@ import {
   insertProductVariantSchema 
 } from "@shared/schema";
 import { z } from "zod";
+import passport from "passport";
+import bcrypt from "bcrypt";
+
+// Define user type for passport
+declare global {
+  namespace Express {
+    interface User {
+      id: number;
+      email: string;
+      name: string;
+      role: string;
+      phone?: string;
+      shopName?: string;
+      region?: string;
+      isActive: boolean;
+      createdAt: Date;
+    }
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = loginSchema.parse(req.body);
-      const user = await storage.getUserByEmail(email);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // In a real app, you'd use JWT here
-      req.session = { userId: user.id, userRole: user.role };
-      res.json({ user: { ...user, password: undefined } });
-    } catch (error) {
-      res.status(400).json({ message: "Invalid request data" });
-    }
+  app.post("/api/auth/login", passport.authenticate('local'), (req, res) => {
+    res.json({ user: req.user });
   });
 
   app.post("/api/auth/register", async (req, res) => {
