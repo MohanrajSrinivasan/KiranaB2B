@@ -228,16 +228,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Authentication required" });
       }
       
+      console.log("Order request body:", req.body);
+      console.log("User:", req.user);
+      
       const orderData = {
-        ...insertOrderSchema.parse(req.body),
         userId: req.user.id,
-        userType: req.user.role === 'vendor' ? 'vendor' : 'retail_user'
+        userType: req.user.role === 'vendor' ? 'vendor' : 'retail_user',
+        totalAmount: req.body.totalAmount,
+        region: req.body.region,
+        status: req.body.status || 'pending',
+        items: req.body.items
       };
       
-      const order = await storage.createOrder(orderData);
+      console.log("Order data to validate:", orderData);
+      
+      const validatedData = insertOrderSchema.parse(orderData);
+      console.log("Validated data:", validatedData);
+      
+      const order = await storage.createOrder(validatedData);
       res.status(201).json(order);
     } catch (error) {
-      res.status(400).json({ message: "Invalid order data" });
+      console.error("Order creation error:", error);
+      res.status(400).json({ 
+        message: "Invalid order data",
+        error: error.message 
+      });
     }
   });
 
