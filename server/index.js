@@ -69,8 +69,8 @@ app.use(passport.session());
 
 async function startServer() {
   try {
-    // Seed database
-    await seedDatabase();
+    // Seed MongoDB
+    await seedMongoDB();
     console.log("Database seeded successfully");
   } catch (error) {
     if (error.message.includes("already exists")) {

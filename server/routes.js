@@ -4,7 +4,9 @@ import passport from "passport";
 import bcrypt from "bcrypt";
 import { whatsappService } from "./whatsapp-service.js";
 import { Server as SocketIOServer } from "socket.io";
-import { storage } from "./storage.js";
+import { storage } from "./mongodb-storage.js";
+import { insertUserSchema, insertProductSchema, insertOrderSchema, loginSchema } from "@shared/mongodb-schema.js";
+import mongoose from "mongoose";
 
 let io;
 
@@ -101,13 +103,17 @@ export async function registerRoutes(app) {
 
   app.get("/api/products/:id", async (req, res) => {
     try {
-      const product = await storage.getProduct(parseInt(req.params.id));
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+      
+      const product = await storage.getProduct(req.params.id);
       
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
       
-      const variants = await storage.getProductVariants(product.id);
+      const variants = await storage.getProductVariants(product._id || product.id);
       res.json({ ...product, variants });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch product" });
@@ -133,7 +139,11 @@ export async function registerRoutes(app) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const product = await storage.updateProduct(parseInt(req.params.id), req.body);
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+
+      const product = await storage.updateProduct(req.params.id, req.body);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
@@ -149,7 +159,11 @@ export async function registerRoutes(app) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const success = await storage.deleteProduct(parseInt(req.params.id));
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+
+      const success = await storage.deleteProduct(req.params.id);
       if (!success) {
         return res.status(404).json({ message: "Product not found" });
       }
@@ -166,9 +180,13 @@ export async function registerRoutes(app) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
+      if (!mongoose.Types.ObjectId.isValid(req.params.productId)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+
       const variant = await storage.createProductVariant({
         ...req.body,
-        productId: parseInt(req.params.productId)
+        productId: req.params.productId
       });
       res.status(201).json(variant);
     } catch (error) {
