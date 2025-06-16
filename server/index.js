@@ -6,8 +6,8 @@ import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import { setupVite, serveStatic } from "./vite.js";
 import { registerRoutes } from "./routes.js";
-import { storage } from "./storage.js";
-import { seedDatabase } from "./seed-database.js";
+import { storage } from "./mongodb-storage.js";
+import { seedMongoDB } from "./mongodb-seed.js";
 
 const app = express();
 app.use(express.json());
