@@ -205,7 +205,7 @@ export async function registerRoutes(app) {
       if (req.user.role === 'admin') {
         orders = await storage.getAllOrders();
       } else {
-        orders = await storage.getOrdersByUser(req.user.id);
+        orders = await storage.getOrdersByUser(req.user._id || req.user.id);
       }
       
       res.json(orders);

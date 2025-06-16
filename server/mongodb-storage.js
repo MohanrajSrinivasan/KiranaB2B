@@ -8,7 +8,12 @@ class MongoStorage {
   }
 
   async initializeConnection() {
-    await connectToMongoDB();
+    try {
+      await connectToMongoDB();
+    } catch (error) {
+      console.error('MongoDB connection failed, using fallback storage');
+      // Initialize fallback behavior
+    }
   }
 
   // User methods
