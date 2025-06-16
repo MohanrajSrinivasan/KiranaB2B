@@ -4,7 +4,7 @@ import passport from "passport";
 import bcrypt from "bcrypt";
 import { whatsappService } from "./whatsapp-service.js";
 import { Server as SocketIOServer } from "socket.io";
-import { storage } from "./mongodb-storage.js";
+import { storage } from "./hybrid-storage.js";
 import { insertUserSchema, insertProductSchema, insertOrderSchema, loginSchema } from "@shared/mongodb-schema.js";
 import mongoose from "mongoose";
 

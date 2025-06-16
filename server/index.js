@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 import { setupVite, serveStatic } from "./vite.js";
 import { registerRoutes } from "./routes.js";
 import { storage } from "./hybrid-storage.js";
-import { seedMongoDB } from "./mongodb-seed.js";
+import { seedHybridStorage } from "./hybrid-seed.js";
 
 const app = express();
 app.use(express.json());
@@ -69,8 +69,8 @@ app.use(passport.session());
 
 async function startServer() {
   try {
-    // Seed MongoDB
-    await seedMongoDB();
+    // Seed database with hybrid storage
+    await seedHybridStorage();
     console.log("Database seeded successfully");
   } catch (error) {
     if (error.message.includes("already exists")) {
