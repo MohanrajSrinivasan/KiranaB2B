@@ -190,12 +190,7 @@ const MenubarRadioItem = React.forwardRef<
 ))
 MenubarRadioItem.displayName = MenubarPrimitive.RadioItem.displayName
 
-const MenubarLabel = React.forwardRef<
-  React.ElementRef<typeof MenubarPrimitive.Label>,
-  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Label> & {
-    inset?oolean
-  }
->(({ className, inset, ...props }, ref) => (
+const MenubarLabel = React.forwardRef(({ className, inset, ...props }, ref) => (
   <MenubarPrimitive.Label
     ref={ref}
     className={cn(
@@ -220,10 +215,7 @@ const MenubarSeparator = React.forwardRef<
 ))
 MenubarSeparator.displayName = MenubarPrimitive.Separator.displayName
 
-const MenubarShortcut = ({
-  className,
-  ...props
-}
+const MenubarShortcut = ({ className, ...props }) => {
   return (
     <span
       className={cn(

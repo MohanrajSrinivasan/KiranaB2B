@@ -10,8 +10,25 @@ let io;
 
 export async function registerRoutes(app) {
   // Authentication routes
-  app.post("/api/auth/login", passport.authenticate('local'), (req, res) => {
-    res.json({ user: req.user });
+  app.post("/api/auth/login", (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+      if (err) {
+        console.error('Authentication error:', err);
+        return res.status(500).json({ message: 'Authentication failed' });
+      }
+      if (!user) {
+        console.log('Authentication failed for:', req.body.email);
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error('Login error:', err);
+          return res.status(500).json({ message: 'Login failed' });
+        }
+        console.log('User logged in successfully:', user.email);
+        res.json({ user: { ...user, password: undefined } });
+      });
+    })(req, res, next);
   });
 
   app.post("/api/auth/logout", (req, res) => {
