@@ -169,7 +169,7 @@ export default function RetailDashboard() {
         variant: 'destructive'
       });
     }
-  }, [productsError, toast]);
+  }, [productsError]);
 
   if (productsLoading) {
     return (

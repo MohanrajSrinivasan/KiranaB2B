@@ -173,7 +173,7 @@ export default function KiranaDashboard() {
         variant: 'destructive'
       });
     }
-  }, [productsError, toast]);
+  }, [productsError]);
 
   if (productsLoading) {
     return (

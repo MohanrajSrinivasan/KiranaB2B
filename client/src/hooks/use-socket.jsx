@@ -7,57 +7,71 @@ export function useSocket() {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !user.id) return;
+
+    // Cleanup previous socket connection
+    if (socket) {
+      socket.close();
+      setSocket(null);
+      setIsConnected(false);
+    }
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
-    const newSocket = new WebSocket(wsUrl);
+    
+    try {
+      const newSocket = new WebSocket(wsUrl);
 
-    newSocket.onopen = () => {
-      setIsConnected(true);
-      
-      // Join appropriate rooms based on user role
-      if (user.role === 'admin') {
-        newSocket.send(JSON.stringify({ type: 'join-admin-room' }));
-      }
-      newSocket.send(JSON.stringify({ type: 'join-user-room', userId: user.id }));
-    };
+      newSocket.onopen = () => {
+        console.log('WebSocket connected');
+        setIsConnected(true);
+        
+        // Join appropriate rooms based on user role
+        if (user.role === 'admin') {
+          newSocket.send(JSON.stringify({ type: 'join-admin-room' }));
+        }
+        newSocket.send(JSON.stringify({ type: 'join-user-room', userId: user.id }));
+      };
 
-    newSocket.onclose = () => {
+      newSocket.onclose = () => {
+        console.log('WebSocket disconnected');
+        setIsConnected(false);
+      };
+
+      newSocket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setIsConnected(false);
+      };
+
+      setSocket(newSocket);
+
+      return () => {
+        console.log('Cleaning up WebSocket connection');
+        newSocket.close();
+        setSocket(null);
+        setIsConnected(false);
+      };
+    } catch (error) {
+      console.error('Failed to create WebSocket:', error);
       setIsConnected(false);
-    };
-
-    newSocket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      setIsConnected(false);
-    };
-
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.close();
-    };
-  }, [user]);
+    }
+  }, [user?.id, user?.role]); // Only depend on user ID and role
 
   return { socket, isConnected };
 }
 
 export function useRealTimeOrders() {
-  const { socket } = useSocket();
+  const { socket, isConnected } = useSocket();
   const [realtimeOrders, setRealtimeOrders] = useState([]);
 
   useEffect(() => {
-    if (!socket) return;
-
-    const handleOrderCreated = (data) => {
-      setRealtimeOrders(prev => [data, ...prev].slice(0, 10)); // Keep last 10
-    };
+    if (!socket || !isConnected) return;
 
     const handleMessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'orderCreated') {
-          handleOrderCreated(data);
+          setRealtimeOrders(prev => [data, ...prev].slice(0, 10)); // Keep last 10
         }
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error);
@@ -67,9 +81,11 @@ export function useRealTimeOrders() {
     socket.addEventListener('message', handleMessage);
 
     return () => {
-      socket.removeEventListener('message', handleMessage);
+      if (socket) {
+        socket.removeEventListener('message', handleMessage);
+      }
     };
-  }, [socket]);
+  }, [socket, isConnected]);
 
   return realtimeOrders;
 }
