@@ -28,8 +28,8 @@ export default function KiranaDashboard() {
   const [orderDialog, setOrderDialog] = useState(false);
   const realtimeOrders = useRealTimeOrders();
 
-  // Redirect if not vendor/kirana
-  if (!user || (user.role !== 'vendor' && user.role !== 'kirana')) {
+  // Redirect if not kirana
+  if (!user || user.role !== 'kirana') {
     setLocation('/');
     return null;
   }
@@ -156,7 +156,7 @@ export default function KiranaDashboard() {
                          product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    const isTargetUser = product.targetUsers?.includes('bulk') || product.targetUsers?.includes('kirana');
+    const isTargetUser = product.targetUsers?.includes('bulk');
     
     return matchesSearch && matchesCategory && isTargetUser && product.isActive;
   }) || [];

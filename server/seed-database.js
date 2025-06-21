@@ -64,7 +64,7 @@ export async function seedDatabase() {
         imageUrl: null,
         stock: 100,
         tags: ["rice", "grains", "premium"],
-        targetUsers: ["vendor", "retail_user"]
+        targetUsers: ["bulk", "retail"]
       },
       {
         name: "Wheat Flour",
@@ -74,7 +74,7 @@ export async function seedDatabase() {
         imageUrl: null,
         stock: 80,
         tags: ["flour", "wheat", "baking"],
-        targetUsers: ["vendor", "retail_user"]
+        targetUsers: ["bulk", "retail"]
       },
       {
         name: "Sugar",
@@ -84,7 +84,7 @@ export async function seedDatabase() {
         imageUrl: null,
         stock: 50,
         tags: ["sugar", "sweetener"],
-        targetUsers: ["vendor", "retail_user"]
+        targetUsers: ["bulk", "retail"]
       },
       {
         name: "Cooking Oil",
@@ -94,7 +94,7 @@ export async function seedDatabase() {
         imageUrl: null,
         stock: 60,
         tags: ["oil", "cooking", "sunflower"],
-        targetUsers: ["vendor", "retail_user"]
+        targetUsers: ["bulk", "retail"]
       },
       {
         name: "Dal (Lentils)",
@@ -104,7 +104,7 @@ export async function seedDatabase() {
         imageUrl: null,
         stock: 75,
         tags: ["dal", "lentils", "pulses"],
-        targetUsers: ["vendor", "retail_user"]
+        targetUsers: ["bulk", "retail"]
       }
     ];
 
