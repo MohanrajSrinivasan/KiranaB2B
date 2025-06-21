@@ -6,8 +6,8 @@ import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import { setupVite, serveStatic } from "./vite.js";
 import { registerRoutes } from "./routes.js";
-import { storage } from "./hybrid-storage.js";
-import { seedHybridStorage } from "./hybrid-seed.js";
+import { storage } from "./storage.js";
+import { seedDatabase } from "./seed-database.js";
 
 const app = express();
 app.use(express.json());
@@ -69,8 +69,8 @@ app.use(passport.session());
 
 async function startServer() {
   try {
-    // Seed database with hybrid storage
-    await seedHybridStorage();
+    // Seed database
+    await seedDatabase();
     console.log("Database seeded successfully");
   } catch (error) {
     if (error.message.includes("already exists")) {
