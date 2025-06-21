@@ -4,7 +4,7 @@ import passport from "passport";
 import bcrypt from "bcrypt";
 import { whatsappService } from "./whatsapp-service.js";
 import { Server as SocketIOServer } from "socket.io";
-import { storage } from "./storage.js";
+import { storage } from "./postgresql-storage.js";
 
 let io;
 
