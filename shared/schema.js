@@ -9,7 +9,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   phone: text("phone"),
-  role: text("role").notNull().default("retail_user"),
+  role: text("role").notNull().default("retail"),
   shopName: text("shop_name"),
   region: text("region"),
   isActive: boolean("is_active").default(true),

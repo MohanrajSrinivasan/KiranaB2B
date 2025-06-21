@@ -34,7 +34,7 @@ export async function seedDatabase() {
         email: "vendor@example.com",
         password: vendorPassword,
         phone: "+91 98765 43210",
-        role: "vendor",
+        role: "kirana",
         shopName: "Kumar General Store",
         region: "Mumbai",
         isActive: true
@@ -44,7 +44,7 @@ export async function seedDatabase() {
         email: "retail@example.com",
         password: retailPassword,
         phone: "+91 87654 32109",
-        role: "retail_user",
+        role: "retail",
         shopName: null,
         region: "Mumbai",
         isActive: true
